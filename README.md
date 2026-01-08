@@ -1,1 +1,104 @@
-# Assignment-No.05
+#include <iostream>
+#include <vector>
+#include <fstream>
+#include <string>
+
+using namespace std;
+
+struct Employee {
+    int id;
+    string name;
+    double monthlySalary;
+};
+
+int main() {
+    vector<Employee> employees;
+    
+    int numEmployees;
+    double thresholdAmount;
+
+    cout << "Enter the number of employees: ";
+    if (!(cin >> numEmployees)) {
+        cout << "Invalid input." << endl;
+        return 1;
+    }
+
+    for (int i = 0; i < numEmployees; ++i) {
+        Employee emp;
+        cout << "\n--- Enter details for Employee " << i + 1 << " ---" << endl;
+        cout << "ID: ";
+        cin >> emp.id;
+        
+        cin.ignore(); 
+        
+        cout << "Name: ";
+        getline(cin, emp.name);
+        
+        cout << "Monthly Salary: ";
+        cin >> emp.monthlySalary;
+
+        employees.push_back(emp);
+    }
+
+    cout << "\nEnter the yearly salary threshold for the report: ";
+    cin >> thresholdAmount;
+
+    ofstream outFile("high_salary.txt");
+
+    if (!outFile) {
+        cerr << "Error: Unable to open file for writing!" << endl;
+        return 1;
+    }
+
+    cout << "\nProcessing data and saving to file..." << endl;
+
+    int countSaved = 0;
+    for (const auto& emp : employees) {
+        double yearlySalary = emp.monthlySalary * 12;
+
+        if (yearlySalary > thresholdAmount) {
+            outFile << emp.id << endl;
+            outFile << emp.name << endl;
+            outFile << yearlySalary << endl;
+            countSaved++;
+        }
+    }
+
+    outFile.close();
+    cout << "Successfully saved " << countSaved << " employee(s) to 'high_salary.txt'." << endl;
+
+    ifstream inFile("high_salary.txt");
+
+    if (!inFile) {
+        cerr << "Error: Unable to open file for reading!" << endl;
+        return 1;
+    }
+
+    cout << "\n----------------------------------------" << endl;
+    cout << "   HIGH SALARY EMPLOYEES REPORT         " << endl;
+    cout << "----------------------------------------" << endl;
+
+    int readID;
+    string readName;
+    double readYearlySalary;
+    bool fileIsEmpty = true;
+
+    while (inFile >> readID) {
+        fileIsEmpty = false;
+        inFile.ignore();
+        getline(inFile, readName);
+        inFile >> readYearlySalary;
+
+        cout << "ID: " << readID 
+             << " | Name: " << readName 
+             << " | Yearly Salary: " << readYearlySalary << endl;
+    }
+
+    if (fileIsEmpty) {
+        cout << "No employees found in the file." << endl;
+    }
+
+    inFile.close();
+
+    return 0;
+}
